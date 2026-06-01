@@ -72,12 +72,10 @@ class GameScene extends Phaser.Scene {
     this.cursors  = this.input.keyboard.createCursorKeys();
     this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-    // Contrôles touch
-    this.input.on('pointerdown', (p) => {
-      if (!this.gameActive) return;
-      if (p.y > this.scale.height * 0.65) this.duck();
-      else this.jump();
-    });
+    // Boutons tactiles visibles
+    this.createTouchButtons(W, H);
+
+    // Touch fallback sur tout l'écran (hors boutons)
     this.input.on('pointerup', () => this.unduck());
 
     this.startPhase(0);
@@ -245,6 +243,34 @@ class GameScene extends Phaser.Scene {
         .setDisplaySize(cs, cs).setOrigin(0, 0.5).setDepth(10);
       this.crownIcons.push(crown);
     }
+  }
+
+  createTouchButtons(W, H) {
+    const btnW = 130, btnH = 60, margin = 16, y = H - 38;
+
+    // Bouton SAUTER (gauche)
+    const jumpBg = this.add.rectangle(margin, y, btnW, btnH, 0x1a0040, 0.75)
+      .setOrigin(0, 0.5).setDepth(20).setInteractive();
+    this.add.rectangle(margin, y, btnW, btnH, 0xffd700, 0)
+      .setOrigin(0, 0.5).setStrokeStyle(2, 0xffd700).setDepth(20);
+    this.add.text(margin + btnW / 2, y, '▲  SAUTER', {
+      fontFamily: 'Georgia, serif', fontSize: '15px', color: '#ffd700',
+    }).setOrigin(0.5).setDepth(20);
+
+    jumpBg.on('pointerdown', () => { if (this.gameActive) this.jump(); });
+
+    // Bouton BAISSER (droite)
+    const duckBg = this.add.rectangle(W - margin, y, btnW, btnH, 0x1a0040, 0.75)
+      .setOrigin(1, 0.5).setDepth(20).setInteractive();
+    this.add.rectangle(W - margin, y, btnW, btnH, 0xffd700, 0)
+      .setOrigin(1, 0.5).setStrokeStyle(2, 0xffd700).setDepth(20);
+    this.add.text(W - margin - btnW / 2, y, '▼  BAISSER', {
+      fontFamily: 'Georgia, serif', fontSize: '15px', color: '#ffd700',
+    }).setOrigin(0.5).setDepth(20);
+
+    duckBg.on('pointerdown', () => { if (this.gameActive) this.duck(); });
+    duckBg.on('pointerup',   () => this.unduck());
+    duckBg.on('pointerout',  () => this.unduck());
   }
 
   updateDignityUI() {
